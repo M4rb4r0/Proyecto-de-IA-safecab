@@ -1,12 +1,12 @@
 #!/bin/bash
 
-AMBIENTE="ejercicio3"
+AMBIENTE="safecab"
 APP="app1-ia"
 PORT=7002
 
-RUTA_APP="$HOME/ejercicio3/$APP"
-RUTA_SERVER="$HOME/ejercicio3/apache-$APP"
-RUTA_LOGS="$HOME/ejercicio3/logs"
+RUTA_APP="$HOME/safecab/$APP"
+RUTA_SERVER="$HOME/safecab/apache-$APP"
+RUTA_LOGS="$HOME/safecab/logs"
 
 source "$HOME/miniforge3/bin/activate" "$AMBIENTE" && \
 cd "$RUTA_APP" && \
