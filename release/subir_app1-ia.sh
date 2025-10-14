@@ -18,12 +18,11 @@ else
     exit 1
 fi
 
-export PATH=$(dirname "$HTTPD_BIN"):$PATH
-
 source "$HOME/miniforge3/bin/activate" "$AMBIENTE" && \
 cd "$RUTA_APP" && \
 mkdir -p "$RUTA_LOGS" && \
 mod_wsgi-express setup-server application.wsgi --port $PORT \
       --server-root "$RUTA_SERVER" \
+      --httpd-executable "$HTTPD_BIN" \
       --access-log --log-to-terminal && \
 "$RUTA_SERVER/apachectl" start
