@@ -20,7 +20,33 @@ cd `dirname "$0"`
 BASE_DIR=`pwd`
 
 if [[ "$ACCION" == "web" ]]; then
+    AMBIENTE="ejercicio3"
     APPS_DESTINATION="$HOME/safecab"
+    
+    # Verificar si existe miniforge3/miniconda/anaconda
+    if [[ -d "$HOME/miniforge3" ]]; then
+        CONDA_PATH="$HOME/miniforge3"
+    elif [[ -d "$HOME/miniconda3" ]]; then
+        CONDA_PATH="$HOME/miniconda3"
+    elif [[ -d "$HOME/anaconda3" ]]; then
+        CONDA_PATH="$HOME/anaconda3"
+    else
+        echo "Error: No se encontró instalación de conda"
+        echo "Instale miniforge3, miniconda o anaconda"
+        exit 1
+    fi
+    
+    # Verificar si existe el ambiente
+    if ! "$CONDA_PATH/bin/conda" env list | grep -q "^$AMBIENTE "; then
+        echo "Creando ambiente conda '$AMBIENTE'..."
+        runTest "$CONDA_PATH/bin/conda" create -n "$AMBIENTE" python=3.10 -y
+    fi
+    
+    # Instalar dependencias
+    echo "Instalando dependencias en ambiente '$AMBIENTE'..."
+    source "$CONDA_PATH/bin/activate" "$AMBIENTE"
+    runTest pip install flask requests mod_wsgi torch torchvision pillow
+    
     runTest mkdir -p "$APPS_DESTINATION"
     for app in app1-front app1-ia
     do
