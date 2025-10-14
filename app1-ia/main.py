@@ -4,7 +4,7 @@ from utils import get_prediction
 from flask import Flask, jsonify, request
 
 
-@app.route('/ejercicio3/app1-ia/predict', methods=['POST'])
+@app.route('/safe-cab/app1-ia/predict', methods=['POST'])
 def predict():
     file = request.files['file']
     img_bytes = file.read()

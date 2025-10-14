@@ -8,12 +8,12 @@ from utils import allowed_file
 import secrets
 import requests
 
-@app.route('/ejercicio3/app1-front/')
+@app.route('/safe-cab/app1-front/')
 def index_form():
     return render_template('index.html')
 
 
-@app.route('/ejercicio3/app1-front/upload', methods=['POST'])
+@app.route('/safe-cab/app1-front/upload', methods=['POST'])
 def upload_image():
     if 'file' not in request.files:
         error = 'No se envió ningún archivo'
@@ -45,10 +45,11 @@ def upload_image():
         return render_template('index.html', error=error)
 
 
-@app.route('/ejercicio3/app1-front/display/<filename>')
+@app.route('/safe-cab/app1-front/display/<filename>')
 def display_image(filename):
     return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
 
 if __name__ == "__main__":
     app.run(port=7001)
+
