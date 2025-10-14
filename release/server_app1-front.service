@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 WorkingDirectory=%h
-ExecStart=%h/ejercicio3/subir_app1-front.sh
-ExecStop=%h/ejercicio3/bajar_app1-front.sh
+ExecStart=%h/safecab/subir_app1-front.sh
+ExecStop=%h/safecab/bajar_app1-front.sh
 Type=simple
 KillMode=process
 Restart=on-failure
