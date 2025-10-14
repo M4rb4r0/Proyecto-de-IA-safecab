@@ -7,10 +7,10 @@ from flask import Flask
 app = Flask(__name__)
 
 _candidates = [
-    os.path.join('runs', 'detect', 'train', 'weights', 'best.pt'),
-    os.path.join('runs', 'detect', 'train2', 'weights', 'best.pt'),
-    os.path.join('runs', 'detect', 'train3', 'weights', 'best.pt'),
-    'best.pt',
+    os.path.join('runs', 'detect', 'train', 'weights', 'roboflow_dataset.pt'),
+    os.path.join('runs', 'detect', 'train2', 'weights', 'roboflow_dataset.pt'),
+    os.path.join('runs', 'detect', 'train3', 'weights', 'roboflow_dataset.pt'),
+    'roboflow_dataset.pt',
     'yolo11n.pt'
 ]
 _weights = next((p for p in _candidates if os.path.exists(p)), 'yolo11n.pt')
