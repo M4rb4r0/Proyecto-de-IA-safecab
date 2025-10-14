@@ -1,23 +1,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ImageNet Classification App</title>
+    <title>SafeCab - No+Chat</title>
     <link href='https://fonts.googleapis.com/css?family=Roboto Condensed' rel='stylesheet'>
     <link href="{{ url_for('static' , filename='css/index.css') }}" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<div id="clf-container">
-    <h1>ImageNet Classifier App</h1>
-    <div>
-        Aplicación de ejemplo para Taller de IA. El formulario recibe una imagen y le asocia su clase de ImageNet según
-        Resnet50 a través de un llamado a una API, también en Flask.
+<header class="safecab-header">
+    <div class="brand">
+        <img class="brand-logo" src="{{ url_for('static' , filename='css/safecab-logo.png') }}" alt="SafeCab logo" />
+        <div class="brand-text">
+            <h1>SafeCab</h1>
+            <p>No+Chat — Detección de distracciones al volante</p>
+        </div>
+    </div>
+</header>
+
+<div id="clf-container" class="card">
+    <div class="intro">
+        Esta demo recibe una imagen y el backend de IA (YOLO) detecta si hay uso de celular mientras se maneja.
     </div>
     <form action="{{ url_for('upload_image') }}" class="form-classifier" enctype="multipart/form-data" method="post">
         <input autocomplete="off" name="file" required type="file">
-        <button class="hvr-grow-shadow" type="submit">Enviar</button>
+        <button class="hvr-grow-shadow primary" type="submit">Analizar</button>
     </form>
     {% if filename %}
-    {% if result['predicted_label'] is not none %}
+    {% if result and result['clase_nombre'] is not none %}
     <div class="response response-ok">
 	    <div>Clase: <b>{{ result['clase_id'] }} {{ result['clase_nombre'] }}</b></div>
     </div>
