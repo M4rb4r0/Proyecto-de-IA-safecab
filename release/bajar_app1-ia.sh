@@ -4,4 +4,6 @@ APP="app1-ia"
 
 RUTA_SERVER="$HOME/safecab/apache-$APP"
 
-"$RUTA_SERVER/apachectl" stop
+if [[ -f "$RUTA_SERVER/apachectl" ]]; then
+    "$RUTA_SERVER/apachectl" stop 2>/dev/null || true
+fi

@@ -1,0 +1,5 @@
+flask
+torch
+torchvision
+mod_wsgi
+pillow
