@@ -1,32 +1,25 @@
 # -*- coding: utf-8 -*- 
 import io
-from app import model, imagenet_class_index
-import torchvision.transforms as transforms
+from app import model, model_names
 from PIL import Image
-import torch.nn.functional as F
-
-def transform_image(image_bytes):
-    my_transforms = transforms.Compose([transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
-                                        transforms.CenterCrop(224),
-                                        transforms.ToTensor(),
-                                        transforms.Normalize(
-                                            [0.485, 0.456, 0.406],
-                                            [0.229, 0.224, 0.225])])
-    image = Image.open(io.BytesIO(image_bytes))
-    return my_transforms(image).unsqueeze(0)
 
 
 def get_prediction(image_bytes):
     print("evaluando imagen en la red...")
-    tensor = transform_image(image_bytes=image_bytes)
-    outputs = model.forward(tensor)
-    probabilities = F.softmax(outputs, dim=1)
-    score_tensor, position_tensor = probabilities.max(1)
-    position = position_tensor.item()
-    score = score_tensor.item()
-    print("max-position: {} max-score: {:.3f}".format(position, score))
-    array = imagenet_class_index[str(position)]
-    clase_id = array[0]
-    clase_nombre = array[1]
-    print("clase: {} {}".format(clase_id, clase_nombre))
-    return clase_id, clase_nombre
+    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    results = model.predict(image, imgsz=640, conf=0.25, verbose=False)
+    r = results[0]
+    if r.boxes is None or len(r.boxes) == 0:
+        print("sin detecciones")
+        return "-1", "no_detection"
+    best = None
+    best_conf = -1.0
+    for b in r.boxes:
+        conf = float(b.conf[0].item())
+        if conf > best_conf:
+            best = b
+            best_conf = conf
+    cls_id = int(best.cls[0].item())
+    cls_name = model_names.get(cls_id, str(cls_id)) if isinstance(model_names, dict) else str(cls_id)
+    print("clase: {} {} conf: {:.3f}".format(cls_id, cls_name, best_conf))
+    return str(cls_id), cls_name
