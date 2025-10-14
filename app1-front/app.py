@@ -4,12 +4,12 @@ from flask import Flask
 # puerto 7002 es usado para desarrollo en __main__
 IA_SERVER = 'http://127.0.0.1:7002'
 
-IA_URL = '/safe-cab/app1-ia/predict'
+IA_URL = '/safecab/app1-ia/predict'
 
 UPLOAD_FOLDER = 'static/uploads/'
 
 app = Flask(__name__,
-            static_url_path='/safe-cab/app1-front/static')
+            static_url_path='/safecab/app1-front/static')
             
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
