@@ -30,8 +30,8 @@ else
     exit 1
 fi
 
-# Construir comando con parámetros opcionales
-WSGI_CMD="mod_wsgi-express setup-server application.wsgi --port $PORT --server-root $RUTA_SERVER --httpd-executable $HTTPD_BIN --access-log --log-to-terminal"
+# Construir comando con parámetros opcionales (usar el módulo de Python del entorno)
+WSGI_CMD="python -m mod_wsgi setup-server application.wsgi --port $PORT --server-root $RUTA_SERVER --httpd-executable $HTTPD_BIN --access-log --log-to-terminal"
 
 if [[ -n "$MODULES_DIR" ]]; then
     WSGI_CMD="$WSGI_CMD --modules-directory $MODULES_DIR"
