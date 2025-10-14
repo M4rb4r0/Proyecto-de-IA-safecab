@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request
 import logging
 
 
-@app.route('/safe-cab/app1-ia/predict', methods=['POST'])
+@app.route('/safecab/app1-ia/predict', methods=['POST'])
 def predict():
     try:
         logging.basicConfig(level=logging.INFO)
