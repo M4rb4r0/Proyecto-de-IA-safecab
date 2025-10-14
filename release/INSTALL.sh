@@ -37,18 +37,16 @@ if [[ "$ACCION" == "web" ]]; then
 elif [[ "$ACCION" == "servicios" ]]; then
     SERVICES_DIR="$HOME/.config/systemd/user/"
     runTest mkdir -p "$SERVICES_DIR"
-    runTest cp server_app1-front.service server_app1-ia.service server_app2-front.service server_app2-ia.service "$SERVICES_DIR"
+    runTest cp server_app1-front.service server_app1-ia.service "$SERVICES_DIR"
 	# configurar servicios para que suban en bootear
     runTest loginctl enable-linger
     runTest systemctl --user daemon-reload
     runTest systemctl --user enable server_app1-front
     runTest systemctl --user enable server_app1-ia
-    runTest systemctl --user enable server_app2-front
-    runTest systemctl --user enable server_app2-ia
+
 	# subir servicios
     runTest systemctl --user start server_app1-front
     runTest systemctl --user start server_app1-ia
-    runTest systemctl --user start server_app2-front
-    runTest systemctl --user start server_app2-ia
+
     echo "ok $ACCION"
 fi
