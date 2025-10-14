@@ -30,7 +30,7 @@ python main.py
  * Running on http://127.0.0.1:7002
 ```
 
-En el navegador entrar a http://127.0.0.1:7001/safe-cab/app1-front/ y hacer upload de una imagen. El backend ejecuta YOLO y devuelve `clase_id` y `clase_nombre` de la mejor detección. Si no hay detecciones, devuelve `-1` y `no_detection`.
+En el navegador entrar a http://127.0.0.1:7001/safecab/app1-front/ y hacer upload de una imagen. El backend ejecuta YOLO y devuelve `clase_id` y `clase_nombre` de la mejor detección. Si no hay detecciones, devuelve `-1` y `no_detection`.
 
 # Entrenar el modelo YOLO con tu dataset
 
@@ -48,4 +48,4 @@ Al reiniciar `app1-ia`, el backend cargará automáticamente `runs/detect/train/
 
 - **Puerto en uso (7001/7002)**: si aparece "Port XXXX is in use", cierre el proceso que usa el puerto o cambie el puerto en `app1-front/main.py` o `app1-ia/main.py`.
   - macOS: `lsof -i :7001` y luego `kill -9 <PID>`.
-- **Plantilla no encontrada o error al renderizar**: la UI está en `app1-front/templates/index.html`. Asegúrese de abrir la ruta exacta `http://127.0.0.1:7001/safe-cab/app1-front/`.
+- **Plantilla no encontrada o error al renderizar**: la UI está en `app1-front/templates/index.html`. Asegúrese de abrir la ruta exacta `http://127.0.0.1:7001/safecab/app1-front/`.
