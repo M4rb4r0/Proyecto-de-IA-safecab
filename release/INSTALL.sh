@@ -45,7 +45,8 @@ if [[ "$ACCION" == "web" ]]; then
     # Instalar dependencias
     echo "Instalando dependencias en ambiente '$AMBIENTE'..."
     source "$CONDA_PATH/bin/activate" "$AMBIENTE"
-    runTest pip install flask requests mod_wsgi torch torchvision pillow
+    runTest conda install -n "$AMBIENTE" -c conda-forge mod_wsgi -y
+    runTest pip install flask requests torch torchvision pillow
     
     runTest mkdir -p "$APPS_DESTINATION"
     for app in app1-front app1-ia
