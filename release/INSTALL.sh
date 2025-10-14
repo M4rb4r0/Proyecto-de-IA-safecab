@@ -20,9 +20,9 @@ cd `dirname "$0"`
 BASE_DIR=`pwd`
 
 if [[ "$ACCION" == "web" ]]; then
-    APPS_DESTINATION="$HOME/ejercicio3"
+    APPS_DESTINATION="$HOME/safecab"
     runTest mkdir -p "$APPS_DESTINATION"
-    for app in app1-front app1-ia app2-front app2-ia
+    for app in app1-front app1-ia
     do
         echo "instalando $app en $APPS_DESTINATION ..."
         if [[ -f "$APPS_DESTINATION/bajar_$app.sh" ]]; then
