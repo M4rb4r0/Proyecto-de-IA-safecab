@@ -1,14 +1,26 @@
 # -*- coding: utf-8 -*- 
-import json
-from torchvision import models
+import os
+import torch
+from ultralytics import YOLO
 from flask import Flask
 
 app = Flask(__name__)
 
-# Ver otros modelos en https://docs.pytorch.org/vision/main/models.html
-model = models.resnet50(weights='IMAGENET1K_V2')
-model.eval()
+_candidates = [
+    os.path.join('runs', 'detect', 'train', 'weights', 'best.pt'),
+    os.path.join('runs', 'detect', 'train2', 'weights', 'best.pt'),
+    os.path.join('runs', 'detect', 'train3', 'weights', 'best.pt'),
+    'best.pt',
+    'yolo11n.pt'
+]
+_weights = next((p for p in _candidates if os.path.exists(p)), 'yolo11n.pt')
+model = YOLO(_weights)
+if torch.cuda.is_available():
+    model.to('cuda')
+try:
+    model.model.eval()
+except Exception:
+    pass
 
-FILENAME_IMAGENET_CLASSES = 'imagenet_class_index.json'
-
-imagenet_class_index = json.load(open(FILENAME_IMAGENET_CLASSES))
+# expose class names for utils
+model_names = model.names if hasattr(model, 'names') else {}
