@@ -63,7 +63,8 @@ if [[ "$ACCION" == "web" ]]; then
     do
         echo "instalando $app en $APPS_DESTINATION ..."
         if [[ -f "$APPS_DESTINATION/bajar_$app.sh" ]]; then
-            runTest bash "$APPS_DESTINATION/bajar_$app.sh"
+            echo "[`date "+%F %T"`]\$ bash $APPS_DESTINATION/bajar_$app.sh"
+            bash "$APPS_DESTINATION/bajar_$app.sh" || true
         fi
         runTest cp -r "../$app/" "$APPS_DESTINATION/"
         runTest cp "subir_$app.sh" "bajar_$app.sh" "$APPS_DESTINATION"
