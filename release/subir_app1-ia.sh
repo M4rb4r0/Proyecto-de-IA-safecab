@@ -1,6 +1,6 @@
 #!/bin/bash
 
-AMBIENTE="safecab"
+AMBIENTE="ejercicio3"
 APP="app1-ia"
 PORT=7002
 
