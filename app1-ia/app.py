@@ -26,3 +26,4 @@ except Exception:
 
 # expose class names for utils
 model_names = model.names if hasattr(model, 'names') else {}
+print(f"Clases del modelo YOLO: {model_names}")

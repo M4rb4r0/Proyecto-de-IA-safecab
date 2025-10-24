@@ -18,26 +18,63 @@
 
 <div id="clf-container" class="card">
     <div class="intro">
-        Esta demo recibe una imagen y el backend de IA (YOLO) detecta si hay uso de celular mientras se maneja.
+        Esta demo recibe una imagen o video y el backend de IA (YOLO) detecta si hay uso de celular mientras se maneja.
     </div>
+    
+    <h3>Analizar Imagen</h3>
     <form action="{{ url_for('upload_image') }}" class="form-classifier" enctype="multipart/form-data" method="post">
-        <input autocomplete="off" name="file" required type="file">
-        <button class="hvr-grow-shadow primary" type="submit">Analizar</button>
+        <input autocomplete="off" name="file" required type="file" accept=".jpg,.jpeg,.png">
+        <button class="hvr-grow-shadow primary" type="submit">Analizar Imagen</button>
     </form>
+    
+    <h3 style="margin-top: 30px;">Analizar Video</h3>
+    <form action="{{ url_for('upload_video') }}" class="form-classifier" enctype="multipart/form-data" method="post">
+        <input autocomplete="off" name="file" required type="file" accept=".mp4,.avi,.mov,.mkv,.webm">
+        <div style="margin: 10px 0;">
+            <label for="sample_rate">Analizar 1 de cada N frames:</label>
+            <input type="number" id="sample_rate" name="sample_rate" value="5" min="1" max="30" style="width: 60px; margin-left: 10px;">
+        </div>
+        <button class="hvr-grow-shadow primary" type="submit">Analizar Video</button>
+    </form>
+    
     {% if filename %}
-    {% if result and result['clase_nombre'] is not none %}
-    <div class="response response-ok">
-	    <div>Clase: <b>{{ result['clase_id'] }} {{ result['clase_nombre'] }}</b></div>
-    </div>
-    {% else %}
-    <div class="response response-error">
-        Error de predicción. No se encontró ninguna clase.
-        {% if error %}
-        <div>Detalle del error: {{error}}</div>
+        {% if is_video and video_result %}
+        <div class="response response-ok">
+            <h3>Resultados del Video</h3>
+            <div><b>Total de frames:</b> {{ video_result['total_frames'] }}</div>
+            <div><b>Frames analizados:</b> {{ video_result['frames_analizados'] }} (1 de cada {{ video_result['sample_rate'] }})</div>
+            <div><b>FPS del video:</b> {{ video_result['fps'] }}</div>
+            <hr style="margin: 15px 0;">
+            <div style="font-size: 1.2em; margin: 10px 0;">
+                <b>🚨 Texting:</b> {{ video_result['texting_count'] }} frames 
+                <span style="color: #e74c3c; font-weight: bold;">({{ video_result['porcentaje_texting'] }}%)</span>
+            </div>
+            <div style="font-size: 1.2em; margin: 10px 0;">
+                <b>✅ Manejo seguro:</b> {{ video_result['safe_driving_count'] }} frames 
+                <span style="color: #27ae60; font-weight: bold;">({{ video_result['porcentaje_safe_driving'] }}%)</span>
+            </div>
+            <div style="font-size: 1.2em; margin: 10px 0;">
+                <b>❓ No detectado:</b> {{ video_result['no_detection_count'] }} frames 
+                <span style="color: #95a5a6; font-weight: bold;">({{ video_result['porcentaje_no_detection'] }}%)</span>
+            </div>
+        </div>
+        <video controls class="uploaded-image" style="max-width: 100%;">
+            <source src="{{ url_for('display_image', filename=filename) }}" type="video/mp4">
+            Tu navegador no soporta el elemento de video.
+        </video>
+        {% elif result and result['clase_nombre'] is not none %}
+        <div class="response response-ok">
+            <div>Clase: <b>{{ result['clase_id'] }} {{ result['clase_nombre'] }}</b></div>
+        </div>
+        <img alt="Uploaded image" class="uploaded-image" src="{{ url_for('display_image', filename=filename) }}">
+        {% else %}
+        <div class="response response-error">
+            Error de predicción. No se encontró ninguna clase.
+            {% if error %}
+            <div>Detalle del error: {{error}}</div>
+            {% endif %}
+        </div>
         {% endif %}
-    </div>
-    {% endif %}
-    <img alt="Uploaded image" class="uploaded-image" src="{{ url_for('display_image', filename=filename) }}">
     {% endif %}
     {% if not filename and error %}
     <div class="response response-ok">

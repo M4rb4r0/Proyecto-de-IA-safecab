@@ -5,6 +5,7 @@ from flask import Flask
 IA_SERVER = 'http://127.0.0.1:7002'
 
 IA_URL = '/safecab/app1-ia/predict'
+IA_VIDEO_URL = '/safecab/app1-ia/predict-video'
 
 UPLOAD_FOLDER = 'static/uploads/'
 
@@ -13,4 +14,4 @@ app = Flask(__name__,
             
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB para videos
