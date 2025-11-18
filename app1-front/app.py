@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*- 
 from flask import Flask
+import os
 
-# puerto 7002 es usado para desarrollo en __main__
-IA_SERVER = 'http://127.0.0.1:7002'
+# Servidor de IA separado en puerto 7060
+# Usar variable de entorno o default a localhost para desarrollo
+IA_SERVER = os.environ.get('IA_SERVER', 'http://10.0.218.101:7060')
 
 IA_URL = '/safecab/app1-ia/predict'
 IA_VIDEO_URL = '/safecab/app1-ia/predict-video'

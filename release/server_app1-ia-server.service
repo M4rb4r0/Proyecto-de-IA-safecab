@@ -1,0 +1,15 @@
+[Unit]
+Description=Servidor IA SafeCab en puerto 7060
+After=network.target
+
+[Service]
+WorkingDirectory=%h
+ExecStart=%h/safecab/subir_app1-ia-server.sh
+ExecStop=%h/safecab/bajar_app1-ia-server.sh
+Type=simple
+KillMode=process
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
