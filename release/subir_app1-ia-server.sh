@@ -8,39 +8,21 @@ RUTA_APP="$HOME/safecab/$APP"
 RUTA_SERVER="$HOME/safecab/apache-$APP"
 RUTA_LOGS="$HOME/safecab/logs"
 
-# Detectar la ubicación de httpd y sus módulos
-if command -v httpd &> /dev/null; then
-    HTTPD_BIN=$(which httpd)
-    # Intentar detectar el directorio de módulos para httpd
-    if [[ -d "/usr/lib64/httpd/modules" ]]; then
-        MODULES_DIR="/usr/lib64/httpd/modules"
-    elif [[ -d "/usr/lib/httpd/modules" ]]; then
-        MODULES_DIR="/usr/lib/httpd/modules"
-    fi
-elif command -v apache2 &> /dev/null; then
-    HTTPD_BIN=$(which apache2)
-    # Intentar detectar el directorio de módulos para apache2
-    if [[ -d "/usr/lib/apache2/modules" ]]; then
-        MODULES_DIR="/usr/lib/apache2/modules"
-    elif [[ -d "/usr/lib64/apache2/modules" ]]; then
-        MODULES_DIR="/usr/lib64/apache2/modules"
-    fi
-else
-    echo "Error: No se encontró httpd o apache2 en el sistema"
-    exit 1
-fi
-
 # Activar ambiente conda
 source "$HOME/miniforge3/bin/activate" "$AMBIENTE"
 
-# Construir comando con parámetros opcionales
-WSGI_CMD="python -m mod_wsgi.express setup-server application.wsgi --port $PORT --server-root $RUTA_SERVER --httpd-executable $HTTPD_BIN --access-log --log-to-terminal"
-
-if [[ -n "$MODULES_DIR" ]]; then
-    WSGI_CMD="$WSGI_CMD --modules-directory $MODULES_DIR"
-fi
-
+# Usar mod_wsgi standalone (no requiere Apache del sistema)
+# mod_wsgi-express incluye su propio httpd
 cd "$RUTA_APP" && \
 mkdir -p "$RUTA_LOGS" && \
-eval $WSGI_CMD && \
-"$RUTA_SERVER/apachectl" start
+nohup python -m mod_wsgi.express start-server application.wsgi \
+    --port $PORT \
+    --host 0.0.0.0 \
+    --server-name 10.0.218.101 \
+    --log-to-terminal \
+    --access-log \
+    > "$RUTA_LOGS/app1-ia.log" 2>&1 &
+
+echo $! > "$RUTA_APP/server.pid"
+echo "Servidor iniciado en puerto $PORT (PID: $(cat $RUTA_APP/server.pid))"
+echo "Accesible desde: http://10.0.218.101:$PORT/safecab/app1-ia/predict"
