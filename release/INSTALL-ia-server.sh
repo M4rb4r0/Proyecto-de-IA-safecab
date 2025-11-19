@@ -15,8 +15,15 @@ BASE_DIR=`pwd`
 AMBIENTE="safecab-ia"
 APPS_DESTINATION="$HOME/safecab"
 
-# mod_wsgi standalone no requiere Apache del sistema
-echo "Usando mod_wsgi standalone (no requiere Apache del sistema)"
+# Verificar si httpd está instalado
+if ! command -v httpd &> /dev/null && ! command -v apache2 &> /dev/null; then
+    echo "Error: Apache (httpd) no está instalado en el sistema"
+    echo "Por favor instale Apache con uno de estos comandos:"
+    echo "  Ubuntu/Debian: sudo apt-get install apache2 apache2-dev"
+    echo "  RedHat/CentOS: sudo yum install httpd httpd-devel"
+    echo "  Fedora: sudo dnf install httpd httpd-devel"
+    exit 1
+fi
 
 # Verificar si existe miniforge3/miniconda/anaconda
 if [[ -d "$HOME/miniforge3" ]]; then
