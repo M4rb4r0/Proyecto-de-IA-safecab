@@ -6,15 +6,24 @@ from flask import Flask
 
 app = Flask(__name__)
 
+_env_model = os.environ.get('MODEL_FILE') or os.environ.get('MODEL_WEIGHTS')
+
 _candidates = [
-    os.path.join('runs', 'detect', 'train', 'weights', 'roboflow_dataset.pt'),
-    os.path.join('runs', 'detect', 'train2', 'weights', 'roboflow_dataset.pt'),
-    os.path.join('runs', 'detect', 'train3', 'weights', 'roboflow_dataset.pt'),
-    os.path.join('runs', 'detect', 'train', 'roboflow_dataset.pt'),
-    'roboflow_dataset.pt',
-    'yolo11n.pt'
+    _env_model,
+    os.path.join('runs', 'detect', 'train', 'weights', 'best.pt'),
+    'best.pt',
 ]
-_weights = next((p for p in _candidates if os.path.exists(p)), 'yolo11n.pt')
+
+_weights = next((p for p in _candidates if p and os.path.exists(p)), None)
+
+if _weights is None:
+    raise FileNotFoundError(
+        "No se encontró el modelo best.pt. Por favor:\n"
+        "1. Copia best.pt al directorio de la app, o\n"
+        "2. Colócalo en runs/detect/train/weights/best.pt, o\n"
+        "3. Define MODEL_FILE=/ruta/completa/a/best.pt"
+    )
+
 print(f"Cargando pesos YOLO desde: {_weights}")
 model = YOLO(_weights)
 if torch.cuda.is_available():
