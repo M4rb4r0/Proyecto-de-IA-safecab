@@ -84,6 +84,7 @@ def get_video_prediction(video_bytes, sample_rate=5):
         no_detection_count = 0
         frame_idx = 0
         frames_analizados = 0
+        frame_details = []  # Lista con info de cada frame analizado
         
         print(f"video: {total_frames} frames totales, {fps:.2f} fps")
         print(f"analizando 1 de cada {sample_rate} frames...")
@@ -107,6 +108,9 @@ def get_video_prediction(video_bytes, sample_rate=5):
                 found_texting = False
                 found_safe_driving = False
                 
+                best_conf = 0.0
+                clasificacion_detectada = "no_detection"
+                
                 if r.boxes is not None and len(r.boxes) > 0:
                     print(f"  Frame {frame_idx}: {len(r.boxes)} detecciones")
                     for b in r.boxes:
@@ -115,24 +119,43 @@ def get_video_prediction(video_bytes, sample_rate=5):
                         conf = float(b.conf[0].item())
                         print(f"    - Clase: {cls_name} (id={cls_id}), conf={conf:.3f}")
                         
-                        if cls_name == 'texting':
-                            found_texting = True
-                            break
-                        elif cls_name == 'safe driving':
-                            found_safe_driving = True
+                        # Buscar texting (variaciones posibles)
+                        if cls_name.lower() in ['texting', 'texting_phone', 'phone', 'c1']:
+                            if conf > best_conf or not found_texting:
+                                found_texting = True
+                                best_conf = conf
+                                clasificacion_detectada = cls_name
+                        # Buscar safe driving (variaciones posibles)
+                        elif cls_name.lower() in ['safe driving', 'safe_driving', 'safe-driving', 'normal', 'c0']:
+                            if not found_texting and (conf > best_conf or not found_safe_driving):
+                                found_safe_driving = True
+                                best_conf = conf
+                                clasificacion_detectada = cls_name
                 else:
                     print(f"  Frame {frame_idx}: sin detecciones")
                 
                 # Prioridad: texting > safe driving > no_detection
+                clasificacion_final = "no_detection"
                 if found_texting:
                     texting_count += 1
-                    print(f"  -> Clasificado como: TEXTING")
+                    clasificacion_final = "texting"
+                    print(f"  -> Clasificado como: TEXTING ({clasificacion_detectada}, conf={best_conf:.3f})")
                 elif found_safe_driving:
                     safe_driving_count += 1
-                    print(f"  -> Clasificado como: SAFE-DRIVING")
+                    clasificacion_final = "safe_driving"
+                    print(f"  -> Clasificado como: SAFE-DRIVING ({clasificacion_detectada}, conf={best_conf:.3f})")
                 else:
                     no_detection_count += 1
                     print(f"  -> Clasificado como: NO_DETECTION")
+                
+                # Calcular timestamp en segundos y guardar detalle del frame
+                timestamp = frame_idx / fps if fps > 0 else 0
+                frame_details.append({
+                    'frame_number': frame_idx,
+                    'timestamp': round(timestamp, 2),
+                    'clasificacion': clasificacion_final,
+                    'confianza': round(best_conf, 3)
+                })
                 
                 frames_analizados += 1
                 
@@ -158,7 +181,8 @@ def get_video_prediction(video_bytes, sample_rate=5):
             'porcentaje_safe_driving': round(porcentaje_safe_driving, 2),
             'porcentaje_no_detection': round(porcentaje_no_detection, 2),
             'fps': round(fps, 2),
-            'sample_rate': sample_rate
+            'sample_rate': sample_rate,
+            'frame_details': frame_details  # Agregar detalles frame-by-frame para CSV
         }
         
         print(f"resultado: {frames_analizados} frames analizados")
