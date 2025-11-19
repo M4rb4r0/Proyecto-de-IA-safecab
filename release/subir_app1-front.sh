@@ -2,7 +2,7 @@
 
 AMBIENTE="ejercicio3"
 APP="app1-front"
-PORT=7001
+PORT=7003
 
 RUTA_APP="$HOME/safecab/$APP"
 RUTA_SERVER="$HOME/safecab/apache-$APP"
