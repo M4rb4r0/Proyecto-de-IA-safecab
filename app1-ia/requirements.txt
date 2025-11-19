@@ -3,3 +3,4 @@ torch
 torchvision
 mod_wsgi
 pillow
+opencv-python

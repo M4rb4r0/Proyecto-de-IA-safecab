@@ -1,0 +1,15 @@
+[Unit]
+Description=Servidor IA SafeCab (Gunicorn) en puerto 7060
+After=network.target
+
+[Service]
+WorkingDirectory=%h/safecab-ia-server
+ExecStart=%h/safecab-ia-server/subir.sh
+ExecStop=%h/safecab-ia-server/bajar.sh
+Type=forking
+KillMode=process
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
