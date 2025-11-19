@@ -7,13 +7,11 @@ PORT=7060
 RUTA_APP="$HOME/safecab-ia-server/$APP"
 RUTA_LOGS="$HOME/safecab-ia-server/logs"
 
-# Activar ambiente conda
 source "$HOME/miniforge3/bin/activate" "$AMBIENTE"
 
 cd "$RUTA_APP" && \
 mkdir -p "$RUTA_LOGS"
 
-# Usar Gunicorn (servidor WSGI sin necesidad de Apache)
 nohup gunicorn \
     --bind 0.0.0.0:$PORT \
     --workers 2 \

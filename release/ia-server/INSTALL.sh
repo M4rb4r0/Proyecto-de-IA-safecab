@@ -19,7 +19,7 @@ echo "=== Instalación del Servidor IA (puerto 7060) ==="
 echo "Este script configura el servidor de IA en un directorio separado"
 echo ""
 
-# Verificar si existe miniforge3/miniconda/anaconda
+
 if [[ -d "$HOME/miniforge3" ]]; then
     CONDA_PATH="$HOME/miniforge3"
 elif [[ -d "$HOME/miniconda3" ]]; then
@@ -39,13 +39,11 @@ else
     exit 1
 fi
 
-# Verificar si existe el ambiente
 if ! "$CONDA_PATH/bin/conda" env list | grep -q "^$AMBIENTE "; then
     echo "Creando ambiente conda '$AMBIENTE'..."
     runTest "$CONDA_PATH/bin/conda" create -n "$AMBIENTE" python=3.11 -y
 fi
 
-# Instalar dependencias
 echo "Instalando dependencias en ambiente '$AMBIENTE'..."
 source "$CONDA_PATH/bin/activate" "$AMBIENTE"
 runTest pip install gunicorn flask torch torchvision pillow ultralytics opencv-python
@@ -54,7 +52,6 @@ runTest mkdir -p "$APPS_DESTINATION"
 
 echo "Instalando app1-ia en $APPS_DESTINATION ..."
 
-# Bajar servidor si está corriendo
 if [[ -f "$BASE_DIR/bajar.sh" ]]; then
     echo "[`date "+%F %T"`]\$ bash $BASE_DIR/bajar.sh"
     bash "$BASE_DIR/bajar.sh" 2>/dev/null || true

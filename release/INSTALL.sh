@@ -23,7 +23,6 @@ if [[ "$ACCION" == "web" ]]; then
     AMBIENTE="ejercicio3"
     APPS_DESTINATION="$HOME/safecab"
     
-    # Verificar si httpd está instalado
     if ! command -v httpd &> /dev/null && ! command -v apache2 &> /dev/null; then
         echo "Error: Apache (httpd) no está instalado en el sistema"
         echo "Por favor instale Apache con uno de estos comandos:"
@@ -33,7 +32,6 @@ if [[ "$ACCION" == "web" ]]; then
         exit 1
     fi
     
-    # Verificar si existe miniforge3/miniconda/anaconda
     if [[ -d "$HOME/miniforge3" ]]; then
         CONDA_PATH="$HOME/miniforge3"
     elif [[ -d "$HOME/miniconda3" ]]; then
@@ -45,46 +43,46 @@ if [[ "$ACCION" == "web" ]]; then
         echo "Instale miniforge3, miniconda o anaconda"
         exit 1
     fi
-    
-    # Verificar si existe el ambiente
+
     if ! "$CONDA_PATH/bin/conda" env list | grep -q "^$AMBIENTE "; then
         echo "Creando ambiente conda '$AMBIENTE'..."
         runTest "$CONDA_PATH/bin/conda" create -n "$AMBIENTE" python=3.10 -y
     fi
-    
-    # Instalar dependencias
+
     echo "Instalando dependencias en ambiente '$AMBIENTE'..."
     source "$CONDA_PATH/bin/activate" "$AMBIENTE"
     runTest conda install -n "$AMBIENTE" -c conda-forge mod_wsgi -y
-    runTest pip install flask requests torch torchvision pillow
+    runTest pip install flask requests
     
     runTest mkdir -p "$APPS_DESTINATION"
-    for app in app1-front app1-ia
-    do
-        echo "instalando $app en $APPS_DESTINATION ..."
-        if [[ -f "$APPS_DESTINATION/bajar_$app.sh" ]]; then
-            echo "[`date "+%F %T"`]\$ bash $APPS_DESTINATION/bajar_$app.sh"
-            bash "$APPS_DESTINATION/bajar_$app.sh" || true
-        fi
-        runTest cp -r "../$app/" "$APPS_DESTINATION/"
-        runTest cp "subir_$app.sh" "bajar_$app.sh" "$APPS_DESTINATION"
-        runTest chmod +x "$APPS_DESTINATION/subir_$app.sh" "$APPS_DESTINATION/bajar_$app.sh"
-        runTest bash "$APPS_DESTINATION/subir_$app.sh"
-    done
+    
+
+    echo "instalando app1-front en $APPS_DESTINATION ..."
+    echo "Nota: El backend IA está en http://10.0.218.101:7060"
+    
+    if [[ -f "$APPS_DESTINATION/bajar_app1-front.sh" ]]; then
+        echo "[`date "+%F %T"`]\$ bash $APPS_DESTINATION/bajar_app1-front.sh"
+        bash "$APPS_DESTINATION/bajar_app1-front.sh" || true
+    fi
+    
+    runTest cp -r "../app1-front/" "$APPS_DESTINATION/"
+    runTest cp "subir_app1-front.sh" "bajar_app1-front.sh" "$APPS_DESTINATION"
+    runTest chmod +x "$APPS_DESTINATION/subir_app1-front.sh" "$APPS_DESTINATION/bajar_app1-front.sh"
+    runTest bash "$APPS_DESTINATION/subir_app1-front.sh"
+    
     echo "ok $ACCION"
 elif [[ "$ACCION" == "servicios" ]]; then
     SERVICES_DIR="$HOME/.config/systemd/user/"
     runTest mkdir -p "$SERVICES_DIR"
-    runTest cp server_app1-front.service server_app1-ia.service "$SERVICES_DIR"
-	# configurar servicios para que suban en bootear
+
+    runTest cp server_app1-front.service "$SERVICES_DIR"
+
     runTest loginctl enable-linger
     runTest systemctl --user daemon-reload
     runTest systemctl --user enable server_app1-front
-    runTest systemctl --user enable server_app1-ia
 
-	# subir servicios
     runTest systemctl --user start server_app1-front
-    runTest systemctl --user start server_app1-ia
 
     echo "ok $ACCION"
+    echo "Nota: El backend IA está en servidor dedicado (10.0.218.101:7060)"
 fi

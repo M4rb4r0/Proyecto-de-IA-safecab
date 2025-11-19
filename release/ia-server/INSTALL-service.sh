@@ -15,12 +15,10 @@ SERVICES_DIR="$HOME/.config/systemd/user/"
 runTest mkdir -p "$SERVICES_DIR"
 runTest cp safecab-ia-server.service "$SERVICES_DIR"
 
-# configurar servicio para que suba en bootear
 runTest loginctl enable-linger
 runTest systemctl --user daemon-reload
 runTest systemctl --user enable safecab-ia-server
 
-# subir servicio
 runTest systemctl --user start safecab-ia-server
 
 echo ""

@@ -9,7 +9,6 @@ if [[ -f "$RUTA_APP/server.pid" ]]; then
         echo "Deteniendo servidor IA (PID: $PID)"
         kill $PID
         sleep 2
-        # Si aún está corriendo, forzar
         if ps -p $PID > /dev/null 2>&1; then
             kill -9 $PID
         fi
