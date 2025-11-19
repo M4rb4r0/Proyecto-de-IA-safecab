@@ -65,7 +65,7 @@ def get_video_prediction(video_bytes, sample_rate=5):
         sample_rate: analizar 1 de cada N frames (default: 5 para optimizar)
     
     Returns:
-        dict con total_frames, frames_analizados, texting_count, safe_driving_count, no_detection_count y porcentajes
+        dict con total_frames, frames_analizados, texting_count, safe_driving_count, no_detection_count, porcentajes y frame_details
     """
     print("procesando video...")
     
@@ -84,6 +84,7 @@ def get_video_prediction(video_bytes, sample_rate=5):
         no_detection_count = 0
         frame_idx = 0
         frames_analizados = 0
+        frame_details = []  # Lista con info de cada frame analizado
         
         print(f"video: {total_frames} frames totales, {fps:.2f} fps")
         print(f"analizando 1 de cada {sample_rate} frames...")
@@ -124,15 +125,31 @@ def get_video_prediction(video_bytes, sample_rate=5):
                     print(f"  Frame {frame_idx}: sin detecciones")
                 
                 # Prioridad: texting > safe driving > no_detection
+                clasificacion = "no_detection"
+                confianza = 0.0
+                
                 if found_texting:
                     texting_count += 1
+                    clasificacion = "texting"
                     print(f"  -> Clasificado como: TEXTING")
                 elif found_safe_driving:
                     safe_driving_count += 1
+                    clasificacion = "safe_driving"
                     print(f"  -> Clasificado como: SAFE-DRIVING")
                 else:
                     no_detection_count += 1
                     print(f"  -> Clasificado como: NO_DETECTION")
+                
+                # Calcular timestamp en segundos
+                timestamp = frame_idx / fps if fps > 0 else 0
+                
+                # Guardar detalle del frame
+                frame_details.append({
+                    'frame_number': frame_idx,
+                    'timestamp': round(timestamp, 2),
+                    'clasificacion': clasificacion,
+                    'confianza': round(confianza, 3)
+                })
                 
                 frames_analizados += 1
                 
@@ -158,7 +175,8 @@ def get_video_prediction(video_bytes, sample_rate=5):
             'porcentaje_safe_driving': round(porcentaje_safe_driving, 2),
             'porcentaje_no_detection': round(porcentaje_no_detection, 2),
             'fps': round(fps, 2),
-            'sample_rate': sample_rate
+            'sample_rate': sample_rate,
+            'frame_details': frame_details  # Agregar detalles frame-by-frame
         }
         
         print(f"resultado: {frames_analizados} frames analizados")

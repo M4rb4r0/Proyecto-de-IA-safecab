@@ -57,6 +57,12 @@
                 <b>❓ Indefinido:</b> {{ video_result['no_detection_count'] }} frames 
                 <span style="color: #95a5a6; font-weight: bold;">({{ video_result['porcentaje_no_detection'] }}%)</span>
             </div>
+            <hr style="margin: 15px 0;">
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{ url_for('export_csv') }}" class="hvr-grow-shadow primary" style="display: inline-block; padding: 12px 30px; text-decoration: none; background: #27ae60; color: white; border-radius: 5px; font-weight: bold;">
+                    Exportar resultados a CSV
+                </a>
+            </div>
         </div>
         <video controls class="uploaded-image" style="max-width: 100%;">
             <source src="{{ url_for('display_image', filename=filename) }}" type="video/mp4">
