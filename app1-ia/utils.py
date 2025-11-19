@@ -31,11 +31,13 @@ def get_prediction(image_bytes):
         cls_name_iter = model_names.get(cls_id_iter, str(cls_id_iter)) if isinstance(model_names, dict) else str(cls_id_iter)
         print(f"  - Detección: clase_id={cls_id_iter}, clase_nombre='{cls_name_iter}', conf={conf:.3f}")
         
-        if cls_name_iter == 'texting':
+        # Buscar texting: ID 1 o nombre que contenga "texting" o "c1"
+        if cls_id_iter == 1 or 'texting' in cls_name_iter.lower() or 'c1' in cls_name_iter.lower():
             if conf > best_texting_conf:
                 best_texting = b
                 best_texting_conf = conf
-        elif cls_name_iter == 'safe driving':
+        # Buscar safe driving: ID 0 o nombre que contenga "safe" o "c0"
+        elif cls_id_iter == 0 or 'safe' in cls_name_iter.lower() or 'c0' in cls_name_iter.lower():
             if conf > best_safe_driving_conf:
                 best_safe_driving = b
                 best_safe_driving_conf = conf
@@ -119,14 +121,14 @@ def get_video_prediction(video_bytes, sample_rate=5):
                         conf = float(b.conf[0].item())
                         print(f"    - Clase: {cls_name} (id={cls_id}), conf={conf:.3f}")
                         
-                        # Buscar texting (variaciones posibles)
-                        if cls_name.lower() in ['texting', 'texting_phone', 'phone', 'c1']:
+                        # Buscar texting: buscar por ID (1) o nombre que contenga "texting" o "c1"
+                        if cls_id == 1 or 'texting' in cls_name.lower() or 'c1' in cls_name.lower():
                             if conf > best_conf or not found_texting:
                                 found_texting = True
                                 best_conf = conf
                                 clasificacion_detectada = cls_name
-                        # Buscar safe driving (variaciones posibles)
-                        elif cls_name.lower() in ['safe driving', 'safe_driving', 'safe-driving', 'normal', 'c0']:
+                        # Buscar safe driving: buscar por ID (0) o nombre que contenga "safe" o "c0"
+                        elif cls_id == 0 or 'safe' in cls_name.lower() or 'c0' in cls_name.lower():
                             if not found_texting and (conf > best_conf or not found_safe_driving):
                                 found_safe_driving = True
                                 best_conf = conf
