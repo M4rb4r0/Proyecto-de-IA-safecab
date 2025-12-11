@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 from flask import Flask
 import os
-
-
 
 IA_SERVER = os.environ.get('IA_SERVER', 'http://10.0.218.101:7060')
 

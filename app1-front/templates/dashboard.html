@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats['total_conductores'] or 0 }}</span>
+            <span class="stat-label">Conductores</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats['total_videos'] or 0 }}</span>
+            <span class="stat-label">Videos Analizados</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon red">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats['total_incidentes'] or 0 }}</span>
+            <span class="stat-label">Incidentes Totales</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats['incidentes_pendientes'] or 0 }}</span>
+            <span class="stat-label">Pendientes de Revisar</span>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Conductores -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Conductores</h3>
+            <a href="{{ url_for('nuevo_conductor') }}" class="btn btn-primary btn-sm">+ Nuevo</a>
+        </div>
+        <div class="card-body">
+            {% if conductores %}
+            <div class="conductor-list">
+                {% for c in conductores %}
+                <a href="{{ url_for('detalle_conductor', conductor_id=c['id']) }}" class="conductor-item">
+                    <div class="conductor-avatar">
+                        {{ c['nombre'][0] | upper }}
+                    </div>
+                    <div class="conductor-info">
+                        <span class="conductor-name">{{ c['nombre'] }}</span>
+                        <span class="conductor-meta">{{ c['total_videos'] }} videos &middot; {{ c['total_incidentes'] }} incidentes</span>
+                    </div>
+                    <div class="conductor-status {% if c['promedio_texting'] > 10 %}danger{% elif c['promedio_texting'] > 5 %}warning{% else %}safe{% endif %}">
+                        {{ "%.1f" | format(c['promedio_texting']) }}%
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+                <p>No hay conductores registrados</p>
+                <a href="{{ url_for('nuevo_conductor') }}" class="btn btn-primary">Agregar Conductor</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Incidentes Recientes -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Incidentes Recientes</h3>
+        </div>
+        <div class="card-body">
+            {% if incidentes_recientes %}
+            <div class="incident-list">
+                {% for inc in incidentes_recientes %}
+                <div class="incident-row">
+                    <div class="incident-icon-small">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="incident-details">
+                        <span class="incident-conductor">{{ inc['conductor_nombre'] }}</span>
+                        <span class="incident-time-small">{{ inc['start_time'] }}s - {{ inc['end_time'] }}s ({{ inc['duracion'] }}s)</span>
+                    </div>
+                    <a href="{{ url_for('ver_video', video_id=inc['video_id']) }}?t={{ inc['start_time'] }}" class="btn btn-ghost btn-sm">Ver</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state small">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <p>No hay incidentes recientes</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

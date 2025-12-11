@@ -31,11 +31,13 @@ def get_prediction(image_bytes):
         cls_name_iter = model_names.get(cls_id_iter, str(cls_id_iter)) if isinstance(model_names, dict) else str(cls_id_iter)
         print(f"  - Detección: clase_id={cls_id_iter}, clase_nombre='{cls_name_iter}', conf={conf:.3f}")
         
-        if cls_name_iter == 'texting':
+        # Detectar texting (día o noche)
+        if 'texting' in cls_name_iter.lower():
             if conf > best_texting_conf:
                 best_texting = b
                 best_texting_conf = conf
-        elif cls_name_iter == 'safe driving':
+        # Detectar safe driving (día o noche)
+        elif 'safe' in cls_name_iter.lower():
             if conf > best_safe_driving_conf:
                 best_safe_driving = b
                 best_safe_driving_conf = conf
@@ -84,7 +86,10 @@ def get_video_prediction(video_bytes, sample_rate=5):
         no_detection_count = 0
         frame_idx = 0
         frames_analizados = 0
-        
+
+        # Lista de frames donde se detectó texting (para agrupar en incidentes)
+        texting_frames = []
+
         print(f"video: {total_frames} frames totales, {fps:.2f} fps")
         print(f"analizando 1 de cada {sample_rate} frames...")
         
@@ -104,28 +109,38 @@ def get_video_prediction(video_bytes, sample_rate=5):
                 r = results[0]
                 
                 # Clasificar frame en 3 categorías
+                # Primero revisar TODAS las detecciones, texting tiene prioridad absoluta
                 found_texting = False
                 found_safe_driving = False
-                
+
                 if r.boxes is not None and len(r.boxes) > 0:
                     print(f"  Frame {frame_idx}: {len(r.boxes)} detecciones")
+
+                    # Primero: buscar si hay algún texting en todas las detecciones
                     for b in r.boxes:
                         cls_id = int(b.cls[0].item())
                         cls_name = model_names.get(cls_id, str(cls_id)) if isinstance(model_names, dict) else str(cls_id)
                         conf = float(b.conf[0].item())
                         print(f"    - Clase: {cls_name} (id={cls_id}), conf={conf:.3f}")
-                        
-                        if cls_name == 'texting':
+
+                        if 'texting' in cls_name.lower():
                             found_texting = True
-                            break
-                        elif cls_name == 'safe driving':
-                            found_safe_driving = True
+
+                    # Solo si no hay texting, buscar safe driving
+                    if not found_texting:
+                        for b in r.boxes:
+                            cls_id = int(b.cls[0].item())
+                            cls_name = model_names.get(cls_id, str(cls_id)) if isinstance(model_names, dict) else str(cls_id)
+                            if 'safe' in cls_name.lower():
+                                found_safe_driving = True
+                                break
                 else:
                     print(f"  Frame {frame_idx}: sin detecciones")
                 
                 # Prioridad: texting > safe driving > no_detection
                 if found_texting:
                     texting_count += 1
+                    texting_frames.append(frame_idx)
                     print(f"  -> Clasificado como: TEXTING")
                 elif found_safe_driving:
                     safe_driving_count += 1
@@ -142,12 +157,56 @@ def get_video_prediction(video_bytes, sample_rate=5):
             frame_idx += 1
         
         cap.release()
-        
+
         # Calcular porcentajes
         porcentaje_texting = (texting_count / frames_analizados * 100) if frames_analizados > 0 else 0
         porcentaje_safe_driving = (safe_driving_count / frames_analizados * 100) if frames_analizados > 0 else 0
         porcentaje_no_detection = (no_detection_count / frames_analizados * 100) if frames_analizados > 0 else 0
-        
+
+        # Agrupar frames de texting en incidentes continuos
+        # Frames con menos de 10 frames de diferencia se consideran parte del mismo incidente
+        texting_incidents = []
+        if texting_frames:
+            # Umbral: frames separados por menos de 10*sample_rate frames originales
+            gap_threshold = 10 * sample_rate
+
+            incident_start = texting_frames[0]
+            incident_end = texting_frames[0]
+
+            for i in range(1, len(texting_frames)):
+                current_frame = texting_frames[i]
+                prev_frame = texting_frames[i - 1]
+
+                if current_frame - prev_frame <= gap_threshold:
+                    # Continúa el mismo incidente
+                    incident_end = current_frame
+                else:
+                    # Nuevo incidente, guardar el anterior
+                    texting_incidents.append({
+                        'start_frame': incident_start,
+                        'end_frame': incident_end,
+                        'start_time': round(incident_start / fps, 2) if fps > 0 else 0,
+                        'end_time': round(incident_end / fps, 2) if fps > 0 else 0,
+                        'duration': round((incident_end - incident_start) / fps, 2) if fps > 0 else 0
+                    })
+                    incident_start = current_frame
+                    incident_end = current_frame
+
+            # Guardar el último incidente
+            texting_incidents.append({
+                'start_frame': incident_start,
+                'end_frame': incident_end,
+                'start_time': round(incident_start / fps, 2) if fps > 0 else 0,
+                'end_time': round(incident_end / fps, 2) if fps > 0 else 0,
+                'duration': round((incident_end - incident_start) / fps, 2) if fps > 0 else 0
+            })
+
+        print(f"Incidentes de texting detectados: {len(texting_incidents)}")
+        for idx, inc in enumerate(texting_incidents):
+            print(f"  Incidente {idx+1}: {inc['start_time']}s - {inc['end_time']}s (duración: {inc['duration']}s)")
+
+        video_duration = round(total_frames / fps, 2) if fps > 0 else 0
+
         resultado = {
             'total_frames': total_frames,
             'frames_analizados': frames_analizados,
@@ -158,7 +217,9 @@ def get_video_prediction(video_bytes, sample_rate=5):
             'porcentaje_safe_driving': round(porcentaje_safe_driving, 2),
             'porcentaje_no_detection': round(porcentaje_no_detection, 2),
             'fps': round(fps, 2),
-            'sample_rate': sample_rate
+            'sample_rate': sample_rate,
+            'video_duration': video_duration,
+            'texting_incidents': texting_incidents
         }
         
         print(f"resultado: {frames_analizados} frames analizados")

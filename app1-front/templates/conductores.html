@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Conductores{% endblock %}
+{% block header %}Conductores{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('nuevo_conductor') }}" class="btn btn-primary">+ Nuevo Conductor</a>
+{% endblock %}
+
+{% block content %}
+{% if conductores %}
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Conductor</th>
+                <th>RUT</th>
+                <th>Turno</th>
+                <th>Videos</th>
+                <th>Incidentes</th>
+                <th>% Texting Promedio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in conductores %}
+            <tr>
+                <td>
+                    <div class="cell-with-avatar">
+                        <div class="avatar-small">{{ c['nombre'][0] | upper }}</div>
+                        <span>{{ c['nombre'] }}</span>
+                    </div>
+                </td>
+                <td>{{ c['rut'] or '-' }}</td>
+                <td>
+                    <span class="badge {% if c['turno'] == 'noche' %}badge-dark{% else %}badge-light{% endif %}">
+                        {{ c['turno'] | capitalize }}
+                    </span>
+                </td>
+                <td>{{ c['total_videos'] }}</td>
+                <td>
+                    {% if c['total_incidentes'] > 0 %}
+                    <span class="text-danger">{{ c['total_incidentes'] }}</span>
+                    {% else %}
+                    <span class="text-muted">0</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="progress-cell">
+                        <div class="progress-bar">
+                            <div class="progress-fill {% if c['promedio_texting'] > 10 %}danger{% elif c['promedio_texting'] > 5 %}warning{% else %}safe{% endif %}"
+                                 style="width: {{ c['promedio_texting'] | min(100) }}%"></div>
+                        </div>
+                        <span>{{ "%.1f" | format(c['promedio_texting']) }}%</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('detalle_conductor', conductor_id=c['id']) }}" class="btn btn-ghost btn-sm">Ver</a>
+                        <a href="{{ url_for('subir_video', conductor_id=c['id']) }}" class="btn btn-outline btn-sm">Subir Video</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state-large">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <line x1="19" y1="8" x2="19" y2="14"></line>
+        <line x1="22" y1="11" x2="16" y2="11"></line>
+    </svg>
+    <h3>No hay conductores registrados</h3>
+    <p>Agrega conductores para comenzar a analizar videos</p>
+    <a href="{{ url_for('nuevo_conductor') }}" class="btn btn-primary btn-lg">+ Agregar Primer Conductor</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -39,29 +39,110 @@
     
     {% if filename %}
         {% if is_video and video_result %}
-        <div class="response response-ok">
-            <h3>Resultados del Video</h3>
-            <div><b>Total de frames:</b> {{ video_result['total_frames'] }}</div>
-            <div><b>Frames analizados:</b> {{ video_result['frames_analizados'] }} (1 de cada {{ video_result['sample_rate'] }})</div>
-            <div><b>FPS del video:</b> {{ video_result['fps'] }}</div>
-            <hr style="margin: 15px 0;">
-            <div style="font-size: 1.2em; margin: 10px 0;">
-                <b>🚨 Texting:</b> {{ video_result['texting_count'] }} frames 
-                <span style="color: #e74c3c; font-weight: bold;">({{ video_result['porcentaje_texting'] }}%)</span>
+        <div class="video-results">
+            <div class="results-header">
+                <h3>Análisis del Video</h3>
+                <div class="video-stats">
+                    <span class="stat">{{ video_result['video_duration'] }}s duración</span>
+                    <span class="stat">{{ video_result['fps'] }} FPS</span>
+                    <span class="stat">{{ video_result['frames_analizados'] }} frames analizados</span>
+                </div>
             </div>
-            <div style="font-size: 1.2em; margin: 10px 0;">
-                <b>✅ Manejo seguro:</b> {{ video_result['safe_driving_count'] }} frames 
-                <span style="color: #27ae60; font-weight: bold;">({{ video_result['porcentaje_safe_driving'] }}%)</span>
+
+            <!-- Timeline visual -->
+            <div class="timeline-container">
+                <div class="timeline-bar" id="timeline-bar">
+                    {% if video_result['texting_incidents'] %}
+                        {% for incident in video_result['texting_incidents'] %}
+                        {% set width_pct = (incident['end_time'] - incident['start_time']) / video_result['video_duration'] * 100 %}
+                        <div class="timeline-incident"
+                             style="left: {{ (incident['start_time'] / video_result['video_duration'] * 100) }}%;
+                                    width: {{ width_pct if width_pct > 1 else 1 }}%;"
+                             data-start="{{ incident['start_time'] }}"
+                             data-end="{{ incident['end_time'] }}"
+                             title="Texting: {{ incident['start_time'] }}s - {{ incident['end_time'] }}s">
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="timeline-labels">
+                    <span>0:00</span>
+                    <span>{{ '%d:%02d' | format(video_result['video_duration'] // 60, video_result['video_duration'] % 60) }}</span>
+                </div>
             </div>
-            <div style="font-size: 1.2em; margin: 10px 0;">
-                <b>❓ No detectado:</b> {{ video_result['no_detection_count'] }} frames 
-                <span style="color: #95a5a6; font-weight: bold;">({{ video_result['porcentaje_no_detection'] }}%)</span>
+
+            <!-- Resumen de estadísticas -->
+            <div class="stats-summary">
+                <div class="stat-card safe">
+                    <div class="stat-value">{{ video_result['porcentaje_safe_driving'] }}%</div>
+                    <div class="stat-label">Manejo Seguro</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-value">{{ video_result['porcentaje_texting'] }}%</div>
+                    <div class="stat-label">Texting</div>
+                </div>
+                <div class="stat-card neutral">
+                    <div class="stat-value">{{ video_result['porcentaje_no_detection'] }}%</div>
+                    <div class="stat-label">Sin Detección</div>
+                </div>
             </div>
+
+            <!-- Lista de incidentes -->
+            {% if video_result['texting_incidents'] %}
+            <div class="incidents-section">
+                <h4>Incidentes Detectados ({{ video_result['texting_incidents'] | length }})</h4>
+                <div class="incidents-list">
+                    {% for incident in video_result['texting_incidents'] %}
+                    <div class="incident-item" onclick="seekToTime({{ incident['start_time'] }})">
+                        <div class="incident-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="incident-info">
+                            <span class="incident-time">{{ '%d:%02d' | format(incident['start_time'] // 60, incident['start_time'] % 60) }} - {{ '%d:%02d' | format(incident['end_time'] // 60, incident['end_time'] % 60) }}</span>
+                            <span class="incident-duration">Duración: {{ incident['duration'] }}s</span>
+                        </div>
+                        <div class="incident-action">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-incidents">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <p>No se detectaron incidentes de texting</p>
+            </div>
+            {% endif %}
         </div>
-        <video controls class="uploaded-image" style="max-width: 100%;">
+
+        <video id="analysis-video" controls class="uploaded-video">
             <source src="{{ url_for('display_image', filename=filename) }}" type="video/mp4">
             Tu navegador no soporta el elemento de video.
         </video>
+
+        <script>
+            function seekToTime(seconds) {
+                const video = document.getElementById('analysis-video');
+                video.currentTime = seconds;
+                video.play();
+                video.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Click en timeline para saltar
+            document.querySelectorAll('.timeline-incident').forEach(el => {
+                el.addEventListener('click', function() {
+                    seekToTime(parseFloat(this.dataset.start));
+                });
+            });
+        </script>
         {% elif result and result['clase_nombre'] is not none %}
         <div class="response response-ok">
             <div>Clase: <b>{{ result['clase_id'] }} {{ result['clase_nombre'] }}</b></div>

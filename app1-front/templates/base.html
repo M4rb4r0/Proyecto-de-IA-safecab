@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SafeCab{% endblock %} - Panel de Control</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>
+    <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='css/safecab-logo.png') }}" alt="SafeCab" class="sidebar-logo">
+            <div class="sidebar-brand">
+                <span class="brand-name">SafeCab</span>
+                <span class="brand-tagline">No+Chat</span>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="{{ url_for('dashboard') }}" class="menu-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('lista_conductores') }}" class="menu-item {% if 'conductor' in request.endpoint %}active{% endif %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Conductores</span>
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="version-info">v1.0.0</div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-title">
+                <h1>{% block header %}Dashboard{% endblock %}</h1>
+            </div>
+            <div class="header-actions">
+                {% block header_actions %}{% endblock %}
+            </div>
+        </header>
+
+        <div class="content-area">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

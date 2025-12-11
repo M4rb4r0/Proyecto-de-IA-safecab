@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Conductor{% endblock %}
+{% block header %}Nuevo Conductor{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="card">
+        <div class="card-body">
+            {% if error %}
+            <div class="alert alert-error">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" class="form">
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo *</label>
+                    <input type="text" id="nombre" name="nombre" required
+                           placeholder="Ej: Juan Pérez González">
+                </div>
+
+                <div class="form-group">
+                    <label for="rut">RUT</label>
+                    <input type="text" id="rut" name="rut"
+                           placeholder="Ej: 12.345.678-9">
+                    <span class="form-hint">Opcional, pero debe ser único</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="turno">Turno Habitual</label>
+                    <select id="turno" name="turno">
+                        <option value="dia">Día</option>
+                        <option value="noche">Noche</option>
+                        <option value="rotativo">Rotativo</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('lista_conductores') }}" class="btn btn-ghost">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Conductor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

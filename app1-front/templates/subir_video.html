@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Subir Video - {{ conductor['nombre'] }}{% endblock %}
+{% block header %}Subir Video{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('lista_conductores') }}">Conductores</a>
+    <span>/</span>
+    <a href="{{ url_for('detalle_conductor', conductor_id=conductor['id']) }}">{{ conductor['nombre'] }}</a>
+    <span>/</span>
+    <span>Subir Video</span>
+</div>
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Analizar Video de {{ conductor['nombre'] }}</h3>
+        </div>
+        <div class="card-body">
+            {% if error %}
+            <div class="alert alert-error">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" class="form" id="upload-form">
+                <div class="form-group">
+                    <label for="file">Archivo de Video *</label>
+                    <div class="file-upload" id="file-upload">
+                        <input type="file" id="file" name="file" required
+                               accept=".mp4,.avi,.mov,.mkv,.webm">
+                        <div class="file-upload-content">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p>Arrastra un video o haz click para seleccionar</p>
+                            <span class="file-hint">MP4, AVI, MOV, MKV, WEBM (máx. 100MB)</span>
+                        </div>
+                        <div class="file-selected" style="display: none;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                            </svg>
+                            <span class="file-name"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fecha_grabacion">Fecha de Grabación</label>
+                        <input type="date" id="fecha_grabacion" name="fecha_grabacion">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="turno">Turno</label>
+                        <select id="turno" name="turno">
+                            <option value="dia">Día</option>
+                            <option value="noche">Noche</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sample_rate">Precisión del Análisis</label>
+                    <select id="sample_rate" name="sample_rate">
+                        <option value="10">Rápido (1 de cada 10 frames)</option>
+                        <option value="5" selected>Normal (1 de cada 5 frames)</option>
+                        <option value="2">Detallado (1 de cada 2 frames)</option>
+                        <option value="1">Máximo (todos los frames)</option>
+                    </select>
+                    <span class="form-hint">Mayor precisión = más tiempo de procesamiento</span>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('detalle_conductor', conductor_id=conductor['id']) }}" class="btn btn-ghost">Cancelar</a>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <span class="btn-text">Analizar Video</span>
+                        <span class="btn-loading" style="display: none;">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 60"></circle>
+                            </svg>
+                            Procesando...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const fileInput = document.getElementById('file');
+const fileUpload = document.getElementById('file-upload');
+const fileSelected = fileUpload.querySelector('.file-selected');
+const fileContent = fileUpload.querySelector('.file-upload-content');
+const fileName = fileUpload.querySelector('.file-name');
+
+fileInput.addEventListener('change', function() {
+    if (this.files.length > 0) {
+        fileName.textContent = this.files[0].name;
+        fileContent.style.display = 'none';
+        fileSelected.style.display = 'flex';
+    } else {
+        fileContent.style.display = 'flex';
+        fileSelected.style.display = 'none';
+    }
+});
+
+// Loading state on submit
+document.getElementById('upload-form').addEventListener('submit', function() {
+    const btn = document.getElementById('submit-btn');
+    btn.querySelector('.btn-text').style.display = 'none';
+    btn.querySelector('.btn-loading').style.display = 'flex';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}
