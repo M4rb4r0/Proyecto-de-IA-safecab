@@ -7,6 +7,7 @@ from flask import Flask
 app = Flask(__name__)
 
 _candidates = [
+    'yolo8medium.pt',
     'yolo8nano.pt',
     os.path.join('runs', 'detect', 'train', 'weights', 'roboflow_dataset.pt'),
     os.path.join('runs', 'detect', 'train2', 'weights', 'roboflow_dataset.pt'),
