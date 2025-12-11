@@ -48,8 +48,9 @@
                 <td>
                     <div class="progress-cell">
                         <div class="progress-bar">
+                            {% set pct = c['promedio_texting'] if c['promedio_texting'] <= 100 else 100 %}
                             <div class="progress-fill {% if c['promedio_texting'] > 10 %}danger{% elif c['promedio_texting'] > 5 %}warning{% else %}safe{% endif %}"
-                                 style="width: {{ c['promedio_texting'] | min(100) }}%"></div>
+                                 style="width: {{ pct }}%"></div>
                         </div>
                         <span>{{ "%.1f" | format(c['promedio_texting']) }}%</span>
                     </div>
